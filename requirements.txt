@@ -1,0 +1,4 @@
+# Python dependencies that are not available through rosdep.
+# Pinned to the commits this repository was tested with.
+shoeboxpy @ git+https://github.com/incebellipipo/shoeboxpy.git@f946597c550b7ed3b7552beda5bfc7ff4b9c5717
+skadipy @ git+https://github.com/incebellipipo/skadipy.git@853452f3c7a84f0069cfccb7f979f9542049c667

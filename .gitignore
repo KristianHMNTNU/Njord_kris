@@ -1,0 +1,13 @@
+# colcon
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Original CAD export, kept locally only
+njord_simulator/meshes/munin/NJ26_MUN_HULL_ASM_MASTER.stl

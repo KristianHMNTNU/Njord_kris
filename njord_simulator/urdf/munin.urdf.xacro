@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="munin">
+
+    <!-- Visual hull. Simplified from NJ26_MUN_HULL_ASM_MASTER.stl, in millimeters with x towards the bow and z up. -->
+    <link name="base_link">
+        <visual>
+            <origin
+                xyz="0.0 0.0 0.0"
+                rpy="0.0 0.0 0.0"
+            />
+            <geometry>
+                <mesh
+                    filename="package://njord_simulator/meshes/munin/munin_simple.stl"
+                    scale="0.001 0.001 0.001"
+                />
+            </geometry>
+        </visual>
+    </link>
+
+    <!-- The simulator publishes world -> base_link_ned, so this is the root link. -->
+    <link name="base_link_ned"/>
+    <joint name="base_link_to_ned" type="fixed">
+        <child link="base_link"/>
+        <parent link="base_link_ned"/>
+        <origin xyz="0 0 0" rpy="-3.1415926 0 0.0"/>
+    </joint>
+
+    <!-- Must match THRUSTERS in munin.py. The x axis of each link is the direction of positive thrust. -->
+    <xacro:property name="thruster_angle" value="${40.0 * pi / 180.0}" />
+
+    <xacro:macro name="thruster" params="thruster_name origin_xyz origin_rpy">
+        <link name="${thruster_name}_link" />
+        <joint name="${thruster_name}_joint" type="fixed">
+            <parent link="base_link_ned" />
+            <child link="${thruster_name}_link" />
+            <origin xyz="${origin_xyz}" rpy="${origin_rpy}" />
+        </joint>
+    </xacro:macro>
+
+    <xacro:thruster
+        thruster_name="fore_port_thruster"
+        origin_xyz="0.276 -0.330 0.124"
+        origin_rpy="0 0 ${-thruster_angle}"
+    />
+
+    <xacro:thruster
+        thruster_name="fore_starboard_thruster"
+        origin_xyz="0.276 0.330 0.124"
+        origin_rpy="0 0 ${thruster_angle}"
+    />
+
+    <xacro:thruster
+        thruster_name="aft_port_thruster"
+        origin_xyz="-0.379 -0.324 0.118"
+        origin_rpy="0 0 ${-(pi - thruster_angle)}"
+    />
+
+    <xacro:thruster
+        thruster_name="aft_starboard_thruster"
+        origin_xyz="-0.379 0.324 0.118"
+        origin_rpy="0 0 ${pi - thruster_angle}"
+    />
+</robot>
