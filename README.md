@@ -72,12 +72,13 @@ cd ~/ros_ws/src
 git clone https://github.com/KristianHMNTNU/Njord_kris.git NJORD
 ```
 
-### 3. Python-pakker (skadipy og shoeboxpy)
+### 3. Python-pakker i en venv (skadipy og shoeboxpy)
 
-Disse finnes ikke som ROS-pakker og må installeres med pip.
+Disse finnes ikke som ROS-pakker og må installeres med pip. Vi installerer dem i en **venv** (et eget Python-miljø) i workspacet, både på Jazzy og Humble:
 
-**Jazzy (Ubuntu 24.04)** – Ubuntu 24.04 tillater ikke `pip install` rett i systemet, så vi bruker en venv.
-`--system-site-packages` gjør at venv-en fortsatt ser ROS sine Python-pakker (`rclpy` osv.).
+- Alt pip installerer havner i `~/ros_ws/venv/`, så resten av Python-oppsettet på maskinen blir ikke påvirket. Vil du fjerne det, sletter du bare mappen.
+- Ubuntu 24.04 (Jazzy) tillater uansett ikke `pip install` rett i systemet.
+- `--system-site-packages` gjør at venv-en fortsatt ser ROS sine Python-pakker (`rclpy` osv.).
 
 ```bash
 cd ~/ros_ws
@@ -86,37 +87,40 @@ source venv/bin/activate
 pip install -r src/NJORD/requirements.txt
 ```
 
-**Humble (Ubuntu 22.04)** – her kan du installere direkte:
-
-```bash
-pip install --user -r ~/ros_ws/src/NJORD/requirements.txt
-```
-
-(Venv som over fungerer også på Humble, hvis du heller vil det.)
-
 ### 4. ROS-avhengigheter og bygging
 
 ```bash
 source /opt/ros/<distro>/setup.bash          # jazzy eller humble
+source ~/ros_ws/venv/bin/activate
 cd ~/ros_ws
-sudo rosdep init                              # bare første gang på maskinen
+sudo rosdep init                              # bare første gang på maskinen (feilmelding hvis allerede gjort er greit)
 rosdep update
 rosdep install --from-paths src/NJORD --ignore-src -y
-colcon build --packages-select njord_simulator njord_control
+colcon build --symlink-install --packages-select njord_simulator njord_control
 ```
+
+**`--symlink-install`** gjør at `install/` peker rett på filene i `src/` i stedet for å kopiere dem. Endringer i Python-filer, launch-filer, URDF og config gjelder da med én gang du starter noden på nytt, uten ny bygging.
+
+Du må fortsatt bygge på nytt når du:
+- legger til en **ny fil** (f.eks. en ny node eller launch-fil)
+- endrer `CMakeLists.txt` eller `package.xml`
+
+> Har du bygget pakkene **uten** `--symlink-install` før, feiler byggingen med
+> `failed to create symbolic link ... Is a directory`. Slett da den gamle byggingen først:
+> ```bash
+> cd ~/ros_ws
+> rm -rf build/njord_simulator build/njord_control install/njord_simulator install/njord_control
+> ```
 
 ### 5. Sourcing i hver ny terminal
 
 ```bash
 source /opt/ros/<distro>/setup.bash
-source ~/ros_ws/venv/bin/activate             # bare hvis du bruker venv (Jazzy)
+source ~/ros_ws/venv/bin/activate
 source ~/ros_ws/install/setup.bash
 ```
 
 Tips: legg linjene i `~/.bashrc`, så slipper du å skrive dem hver gang.
-
-> **Husk å bygge på nytt** (`colcon build ...`) etter at du har endret filer, ellers bruker ROS den gamle versjonen.
-> Bygger du med `colcon build --symlink-install`, trenger du ikke bygge på nytt etter endringer i Python-filer.
 
 ---
 
@@ -336,7 +340,7 @@ Posisjonene er målt fra STL-modellen. Vinkelen er et anslag.
 
 > **Pass på vinkelen:** Thrusterne sitter nesten i et kvadrat. Står de nøyaktig 45°, peker alle kraftlinjene gjennom samme punkt, og båten kan **ikke** snu på stedet. Jo mindre vinkel (mer langs båten), jo mer girmoment.
 
-Bygg på nytt etter endringer: `colcon build --packages-select njord_simulator njord_control`.
+Med `--symlink-install` gjelder endringene neste gang du starter noden. Legger du til nye filer, bygg på nytt: `colcon build --symlink-install --packages-select njord_simulator njord_control`.
 
 ---
 
