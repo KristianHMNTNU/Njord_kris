@@ -69,7 +69,7 @@ sudo apt install python3-pip python3-venv python3-colcon-common-extensions pytho
 ```bash
 mkdir -p ~/ros_ws/src
 cd ~/ros_ws/src
-git clone <REPO-URL> NJORD
+git clone https://github.com/KristianHMNTNU/Njord_kris.git NJORD
 ```
 
 ### 3. Python-pakker (skadipy og shoeboxpy)
